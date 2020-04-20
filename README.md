@@ -1,3 +1,3 @@
 # mcmcTools
 
-Some notebooks or scripts about parameter estimation, model comparison and plots with MCMC methods as Metropolis, nested sampling, etc. 
+Some notebooks and scripts about parameter estimation, model comparison and chain plots of MCMC methods as Metropolis, nested sampling, etc. 
