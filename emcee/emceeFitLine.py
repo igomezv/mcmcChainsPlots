@@ -38,7 +38,10 @@ sigma = 0.5
 data = theory(x, m, c) + sigma*np.random.randn(M)
 
 nDims = 2
-
+# bounds = [bounds_par1, bounds_par2, ...]
+# bounds is list of lists
+#m c
+bounds = [[0.0,5.0], [-10.0,10.0]]
 ##########
 
 def logposterior(theta):
@@ -67,10 +70,10 @@ def loglikelihood(theta):
     m, c = theta
     
     # evaluate the model (assumes that the straight_line model is defined as above)
-    md = theory(x, m, c)
+    th = theory(x, m, c)
     
     # return the log likelihood
-    return -0.5*np.sum(((md - data)/sigma)**2)
+    return -0.5*np.sum(((th - data)/sigma)**2)
 
 # bounds = [[], []]
 
@@ -88,15 +91,23 @@ def logprior(theta):
     lp = 0.
     
     # unpack the model parameters from the tuple
-    m, c = theta
+    # m, c = theta
     
     # uniform prior on c
     cmin = -10. # lower range of prior
     cmax = 10.  # upper range of prior
     
     # set prior to 1 (log prior to 0) if in the range and zero (-inf) outside the range 
-    if cmin < c < cmax and 0 < m < 5.0:
+    for i in range(len(bounds)):
+    	if bounds[i][0] < theta[i] < bounds[i][1]:
+    		flag = True
+    	else:
+    		flag = False
+    #if bounds[0][0] < theta[0] < bounds[0][1] and bounds[1][0] < theta[1] < bounds[1][1]:
+    #if bounds[0][0] < theta[0] < bounds[0][1] and -bounds[1][0] < theta[1] < bounds[1][1:
+    if flag == True:
     	return 0.0
+
     return -np.inf
     
     # Gaussian prior on m
