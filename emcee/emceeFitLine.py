@@ -95,43 +95,39 @@ def logPrior(theta):
     		flag = True
     	else:
     		flag = False
+    		break
     
     if flag == True:
     	return 0.0
-
-    return -np.inf
+    else:
+    	return -np.inf
     
 Nens = 100   # number of ensemble points
 
 ini = []
+
 for i in range(nDims):
 	ini.append(np.random.uniform(bounds[i][0], bounds[i][1], Nens))
-# mini = np.random.normal(mmu, msigma, Nens) # initial m points
-# mini = np.random.uniform(0, 5, Nens) # initial m points
-# cmin = -10.  # lower range of prior
-# cmax = 10.   # upper range of prior
-
-# cini = np.random.uniform(cmin, cmax, Nens) # initial c points
 
 inisamples = np.array(ini).T # initial samples
 
-ndims = inisamples.shape[1] # number of parameters/dimensions
+# ndims = inisamples.shape[1] # number of parameters/dimensions
 
 Nburnin = 500   # number of burn-in samples
 Nsamples = 500  # number of final posterior samples
 
 # set up the sampler
-sampler = emcee.EnsembleSampler(Nens, ndims, logPosterior)
+sampler = emcee.EnsembleSampler(Nens, nDims, logPosterior)
 
 # pass the initial samples and total number of samples required
 sampler.run_mcmc(inisamples, Nsamples+Nburnin);
 
 # extract the samples (removing the burn-in)
-postsamples = sampler.chain[:, Nburnin:, :].reshape((-1, ndims))
+postsamples = sampler.chain[:, Nburnin:, :].reshape((-1, nDims))
 
 print(postsamples)
 
 print('Number of posterior samples is {}'.format(postsamples.shape[0]))
 
-fig = corner.corner(postsamples, labels=[r"$m$", r"$c$"])
+fig = corner.corner(postsamples)
 fig.savefig('emcee.png')
