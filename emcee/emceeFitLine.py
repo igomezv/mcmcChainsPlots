@@ -3,7 +3,7 @@ import numpy as np
 import os
 import sys
 import emcee
-
+import corner
 
 def theory(x, m, c):
     """
@@ -44,7 +44,7 @@ nDims = 2
 bounds = [[0.0,5.0], [-10.0,10.0]]
 ##########
 
-def logposterior(theta):
+def logPosterior(theta):
     """
     The natural logarithm of the joint posterior.
     
@@ -55,7 +55,7 @@ def logposterior(theta):
         x (list): the abscissa values at which the data/model is defined
     """
     
-    lp = logprior(theta) # get the prior
+    lp = logPrior(theta) # get the prior
     
     # if the prior is not finite return a probability of zero (log probability of -inf)
     if not np.isfinite(lp):
@@ -77,7 +77,7 @@ def loglikelihood(theta):
 
 # bounds = [[], []]
 
-def logprior(theta):
+def logPrior(theta):
     """
     The natural logarithm of the prior probability.
     
@@ -86,62 +86,42 @@ def logprior(theta):
     
     Note:
         We can ignore the normalisations of the prior here.
-    """
-    
-    lp = 0.
-    
-    # unpack the model parameters from the tuple
-    # m, c = theta
-    
-    # uniform prior on c
-    cmin = -10. # lower range of prior
-    cmax = 10.  # upper range of prior
-    
+        Uniform prior on all the parameters.
+    """ 
+ 
     # set prior to 1 (log prior to 0) if in the range and zero (-inf) outside the range 
     for i in range(len(bounds)):
     	if bounds[i][0] < theta[i] < bounds[i][1]:
     		flag = True
     	else:
     		flag = False
-    #if bounds[0][0] < theta[0] < bounds[0][1] and bounds[1][0] < theta[1] < bounds[1][1]:
-    #if bounds[0][0] < theta[0] < bounds[0][1] and -bounds[1][0] < theta[1] < bounds[1][1:
+    
     if flag == True:
     	return 0.0
 
     return -np.inf
     
-    # Gaussian prior on m
-    # mmu = 0.     # mean of the Gaussian prior
-    # msigma = 10. # standard deviation of the Gaussian prior
-    # lp -= 0.5*((m - mmu)/msigma)**2
-    # lp += 0. if 0 < m < 10 else -np.inf
-
-    # return lp
-
 Nens = 100   # number of ensemble points
 
-mmu = 0.     # mean of the Gaussian prior
-msigma = 10. # standard deviation of the Gaussian prior
-
+ini = []
+for i in range(nDims):
+	ini.append(np.random.uniform(bounds[i][0], bounds[i][1], Nens))
 # mini = np.random.normal(mmu, msigma, Nens) # initial m points
-mini = np.random.uniform(0, 5, Nens) # initial m points
-cmin = -10.  # lower range of prior
-cmax = 10.   # upper range of prior
+# mini = np.random.uniform(0, 5, Nens) # initial m points
+# cmin = -10.  # lower range of prior
+# cmax = 10.   # upper range of prior
 
-cini = np.random.uniform(cmin, cmax, Nens) # initial c points
+# cini = np.random.uniform(cmin, cmax, Nens) # initial c points
 
-inisamples = np.array([mini, cini]).T # initial samples
+inisamples = np.array(ini).T # initial samples
 
 ndims = inisamples.shape[1] # number of parameters/dimensions
 
 Nburnin = 500   # number of burn-in samples
 Nsamples = 500  # number of final posterior samples
 
-# set additional args for the posterior (the data, the noise std. dev., and the abscissa)
-#argslist = (data, msigma, x)
-
 # set up the sampler
-sampler = emcee.EnsembleSampler(Nens, ndims, logposterior)
+sampler = emcee.EnsembleSampler(Nens, ndims, logPosterior)
 
 # pass the initial samples and total number of samples required
 sampler.run_mcmc(inisamples, Nsamples+Nburnin);
@@ -149,8 +129,7 @@ sampler.run_mcmc(inisamples, Nsamples+Nburnin);
 # extract the samples (removing the burn-in)
 postsamples = sampler.chain[:, Nburnin:, :].reshape((-1, ndims))
 
-# plot posterior samples (if corner.py is installed)
-import corner # import corner.py
+print(postsamples)
 
 print('Number of posterior samples is {}'.format(postsamples.shape[0]))
 
