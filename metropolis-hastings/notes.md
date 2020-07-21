@@ -16,5 +16,5 @@ In this notes, I write some of these recommendations.
 		1) The Markov process delivers a unique stationary distribution. 
 		2) The stationary distribution is proportional to the density function f(q).
 
-	
+	- 	
 
